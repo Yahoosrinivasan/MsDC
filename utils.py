@@ -6,7 +6,6 @@ import numpy as np
 import tensorflow as tf
 from PIL import Image
 
-
 def data_augmentation(image, mode):
     if mode == 0:
         # original
@@ -36,7 +35,6 @@ def data_augmentation(image, mode):
         image = np.rot90(image, k=3)
         return np.flipud(image)
 
-
 class train_data():
     def __init__(self, filepath='./data/image_clean_pat.npy'):
         self.filepath = filepath
@@ -57,10 +55,8 @@ class train_data():
         gc.collect()
         print("In __exit__()")
 
-
 def load_data(filepath='./data/image_clean_pat.npy'):
     return train_data(filepath=filepath)
-
 
 def load_images(filelist):
     # pixel value range 0-255
@@ -72,7 +68,6 @@ def load_images(filelist):
         im = Image.open(file).convert('L')
         data.append(np.array(im).reshape(1, im.size[1], im.size[0], 1))
     return data
-
 
 def save_images(filepath, ground_truth, noisy_image=None, clean_image=None):
     # assert the pixel value range is 0-255
@@ -86,13 +81,11 @@ def save_images(filepath, ground_truth, noisy_image=None, clean_image=None):
     im = Image.fromarray(cat_image.astype('uint8')).convert('L')
     im.save(filepath, 'png')
 
-
 def cal_psnr(im1, im2):
     # assert pixel value range is 0-255 and type is uint8
     mse = ((im1.astype(np.float) - im2.astype(np.float)) ** 2).mean()
     psnr = 10 * np.log10(255 ** 2 / mse)
     return psnr
-
 
 def tf_psnr(im1, im2):
     # assert pixel value range is 0-1
