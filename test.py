@@ -6,7 +6,6 @@ import tensorflow as tf
 
 from utils import *
 
-
 def MsDC(input, is_training=True, output_channels=1):
     with tf.variable_scope('block1'):
         output_1 = tf.layers.conv2d(input, 64, 3, padding='same', activation=tf.nn.relu)
@@ -51,12 +50,7 @@ class denoiser(object):
             self.train_op = optimizer.minimize(self.loss)
         init = tf.global_variables_initializer()
         self.sess.run(init)
-        print("[*] Initialize model successfully...")
-
-    def denoise(self, data):
-        output_clean_image, noisy_image, psnr = self.sess.run([self.Y, self.X, self.eva_psnr],
-                                                              feed_dict={self.Y_: data, self.is_training: False})
-        return output_clean_image, noisy_image, psnr
+        print("[*] Initialize model successfully...")    
 
     def load(self, checkpoint_dir):
         print("[*] Reading checkpoint...")
@@ -104,35 +98,26 @@ class denoiser(object):
         print("--- Average PSNR %.2f ---" % avg_psnr)
         print("--- test time: %4.4f" % avg_time)
 
-
-
 parser = argparse.ArgumentParser(description='')
-
 parser.add_argument('--sigma', dest='sigma', type=int, default=25, help='noise level')
 parser.add_argument('--checkpoint_dir', dest='ckpt_dir', default='./checkpoint_demo', help='models are saved here')
 parser.add_argument('--test_dir', dest='test_dir', default='./test', help='test sample are saved here')
 parser.add_argument('--test_set', dest='test_set', default='Set12', help='dataset for testing')
 args = parser.parse_args()
 
-
-
-
 def denoiser_test(denoiser):
     test_files = glob('./data/test/Set12/*.png')
     denoiser.test(test_files, ckpt_dir=args.ckpt_dir, save_dir=args.test_dir)
 
-
 def main(_):
 
     if not os.path.exists(args.test_dir):
-        os.makedirs(args.test_dir)
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+        os.makedirs(args.test_dir)    
 
     gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.9)
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
         model = denoiser(sess, sigma=args.sigma)
         denoiser_test(model)
-
 
 if __name__ == '__main__':
     tf.app.run()
